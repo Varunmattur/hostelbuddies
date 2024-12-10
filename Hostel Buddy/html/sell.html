@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Item | Hostel Buddy</title>
+    <style>
+        /* Internal CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color:white;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .form-container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group input[type="file"] {
+            padding: 5px;
+        }
+
+        .form-group button {
+            background-color: #0bd723;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .form-group button:hover {
+            background-color: #555;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        footer a {
+            color: #ff6347;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Hostel Buddy</h1>
+    </header>
+
+    <div class="form-container">
+        <h2>Sell Your Item</h2>
+        <form action="/submit-sell-item" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="usn">USN</label>
+                <input type="text" id="usn" name="usn" placeholder="Enter your USN" required>
+            </div>
+
+            <div class="form-group">
+                <label for="mobile">Mobile Number</label>
+                <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="block">Hostel Block</label>
+                <input type="text" id="block" name="block" placeholder="Enter your hostel block" required>
+            </div>
+
+            <div class="form-group">
+                <label for="room">Room Number</label>
+                <input type="text" id="room" name="room" placeholder="Enter your room number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="item">Selling Item</label>
+                <select id="item" name="item" required>
+                    <option value="">Select an item</option>
+                    <option value="study_table">Study Table</option>
+                    <option value="chair">Chair</option>
+                    <option value="bed">Bed</option>
+                    <option value="bookshelf">Bookshelf</option>
+                    <option value="fridge">Mini Refrigerator</option>
+                    <option value="lamp">Desk Lamp</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price (₹)</label>
+                <input type="number" id="price" name="price" placeholder="Enter the price" required>
+            </div>
+
+            <div class="form-group">
+                <label for="age">How Old is the Item (in months)?</label>
+                <input type="number" id="age" name="age" placeholder="Enter item age in months" required>
+            </div>
+
+            <div class="form-group">
+                <label for="image">Upload Item Image</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+                <button type="button" id="open-camera">Open Camera</button>
+                <video id="camera-preview" autoplay></video>
+                <canvas id="snapshot" style="display: none;"></canvas>
+                <input type="hidden" id="captured-image" name="capturedImage">
+            </div>
+            
+            <script>
+                const openCameraButton = document.getElementById('open-camera');
+                const cameraPreview = document.getElementById('camera-preview');
+                const canvas = document.getElementById('snapshot');
+                const capturedImageInput = document.getElementById('captured-image');
+            
+                openCameraButton.addEventListener('click', async () => {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        cameraPreview.style.display = 'block';
+                        cameraPreview.srcObject = stream;
+                        openCameraButton.textContent = 'Take Picture';
+            
+                        openCameraButton.onclick = () => {
+                            const context = canvas.getContext('2d');
+                            canvas.width = cameraPreview.videoWidth;
+                            canvas.height = cameraPreview.videoHeight;
+                            context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+            
+                            // Stop the camera
+                            const tracks = stream.getTracks();
+                            tracks.forEach(track => track.stop());
+                            cameraPreview.style.display = 'none';
+            
+                            // Save the image to the hidden input as base64
+                            const dataURL = canvas.toDataURL('image/png');
+                            capturedImageInput.value = dataURL;
+            
+                            // Optionally, preview the captured image
+                            canvas.style.display = 'block';
+                        };
+                    } catch (error) {
+                        alert('Unable to access the camera. Please allow camera permissions.');
+                    }
+                });
+            </script>                      
+
+            <div class="form-group">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Hostel Buddy. All rights reserved. | 
+            <a href="#">Privacy Policy</a> | 
+            <a href="#">Terms of Service</a>
+        </p>
+    </footer>
+
+</body>
+</html>
